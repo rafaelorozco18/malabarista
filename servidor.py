@@ -24,6 +24,17 @@ navegador sí permite que los módulos se importen entre sí.
 Este script NO usa frameworks ni paquetes externos: solo la
 librería estándar de Python 3 (http.server, socketserver,
 webbrowser, threading). No requiere `pip install` de nada.
+
+Nota técnica adicional: el servidor es MULTI-HILO (ThreadingHTTPServer)
+en vez del TCPServer de un solo hilo. Un servidor de un solo hilo
+atiende una conexión a la vez; si un cliente (por ejemplo, una
+pestaña de navegador con una conexión keep-alive inactiva, o el
+navegador embebido de un editor) deja una conexión abierta sin
+cerrarla, el hilo principal se queda esperando en esa conexión y dejar
+de aceptar cualquier otra — el servidor "se congela" para todo el
+mundo aunque el proceso siga vivo. Con ThreadingHTTPServer cada
+conexión se atiende en su propio hilo, así que una conexión colgada
+no bloquea a las demás.
 ======================================================================
 """
 
@@ -62,6 +73,11 @@ class ManejadorConMimeCorrecto(http.server.SimpleHTTPRequestHandler):
         ".ico": "image/x-icon",
     }
 
+    # Si una conexión se queda inactiva (sin enviar una petición completa)
+    # por más de este tiempo, se cierra sola. Esto evita que una conexión
+    # colgada consuma un hilo para siempre.
+    timeout = 30
+
     def guess_type(self, path):
         # Primero miramos si la extensión está en nuestro mapa explícito.
         _, extension = os.path.splitext(path)
@@ -75,6 +91,19 @@ class ManejadorConMimeCorrecto(http.server.SimpleHTTPRequestHandler):
         sys.stderr.write("  [servidor] %s\n" % (formato % args))
 
 
+class ServidorMultiHilo(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    """
+    HTTPServer + ThreadingMixIn: cada conexión entrante se atiende en
+    su propio hilo. Así, una conexión lenta o colgada (por ejemplo,
+    una pestaña de navegador con keep-alive inactivo) no bloquea al
+    resto de los clientes, a diferencia de un socketserver.TCPServer
+    simple, que es de un solo hilo.
+    """
+
+    allow_reuse_address = True
+    daemon_threads = True  # los hilos no impiden que el proceso cierre con Ctrl+C
+
+
 def encontrar_puerto_disponible(puerto_inicial, puerto_maximo):
     """
     Intenta levantar el servidor en puerto_inicial. Si está ocupado,
@@ -83,7 +112,7 @@ def encontrar_puerto_disponible(puerto_inicial, puerto_maximo):
     """
     for puerto in range(puerto_inicial, puerto_maximo + 1):
         try:
-            servidor = socketserver.TCPServer(("", puerto), ManejadorConMimeCorrecto)
+            servidor = ServidorMultiHilo(("", puerto), ManejadorConMimeCorrecto)
             return servidor, puerto
         except OSError:
             print(f"  Puerto {puerto} ocupado, probando el siguiente...")
@@ -92,7 +121,6 @@ def encontrar_puerto_disponible(puerto_inicial, puerto_maximo):
 
 
 def main():
-    socketserver.TCPServer.allow_reuse_address = True
     servidor, puerto = encontrar_puerto_disponible(PUERTO_INICIAL, PUERTO_MAXIMO)
 
     if servidor is None:
