@@ -1,0 +1,52 @@
+/* Estilos generales del arcade "¡Pilas Que Arranca!" */
+
+:root {
+  --fondo-hud: #14161a;
+  --texto-hud: #f5f3ee;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #0a0b0d;
+  color: var(--texto-hud);
+  font-family: "Courier New", Courier, monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+#contenedor-juego {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 0;
+}
+
+#lienzo {
+  background: #3a3d42;
+  width: min(96vw, 960px);
+  height: auto;
+  aspect-ratio: 960 / 600;
+  image-rendering: pixelated;
+  border: 3px solid #f2b705;
+  border-radius: 6px;
+  box-shadow: 0 0 24px rgba(242, 183, 5, 0.25);
+  cursor: pointer;
+}
+
+#pista-inferior {
+  font-size: 13px;
+  color: #a8aab0;
+  text-align: center;
+  margin: 0 8px 12px 8px;
+  letter-spacing: 0.5px;
+}

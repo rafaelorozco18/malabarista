@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¡Pilas Que Arranca!</title>
+  <link rel="stylesheet" href="css/estilo.css" />
+</head>
+<body>
+  <div id="contenedor-juego">
+    <canvas id="lienzo" width="960" height="600"></canvas>
+  </div>
+  <p id="pista-inferior">
+    WASD / Flechas: moverse &nbsp;·&nbsp; ESPACIO: malabarear &nbsp;·&nbsp;
+    P: pausa &nbsp;·&nbsp; ENTER: empezar &nbsp;·&nbsp; R: reiniciar
+  </p>
+
+  <!-- Punto de entrada como módulo ES6. Requiere servirse por HTTP,
+       ver servidor.py para la explicación de por qué. -->
+  <script type="module" src="js/juego.js"></script>
+</body>
+</html>
