@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#14161a" />
   <title>¡Pilas Que Arranca!</title>
   <link rel="stylesheet" href="css/estilo.css" />
 </head>
@@ -11,8 +12,11 @@
     <canvas id="lienzo" width="960" height="600"></canvas>
   </div>
   <p id="pista-inferior">
-    WASD / Flechas: moverse &nbsp;·&nbsp; ESPACIO: malabarear &nbsp;·&nbsp;
-    P: pausa &nbsp;·&nbsp; ENTER: empezar &nbsp;·&nbsp; R: reiniciar
+    <span>WASD / Flechas: moverse</span>
+    <span>ESPACIO: malabarear</span>
+    <span>P: pausa</span>
+    <span>ENTER: empezar</span>
+    <span>R: reiniciar</span>
   </p>
 
   <!-- Punto de entrada como módulo ES6. Requiere servirse por HTTP,

@@ -12,7 +12,12 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  /* 100vh como respaldo para navegadores viejos; 100dvh (altura real
+     visible, sin la barra del navegador en celulares) para los nuevos.
+     Si el navegador no reconoce "dvh" simplemente ignora esa línea y
+     se queda con el valor de "vh" de arriba. */
+  min-height: 100vh;
+  min-height: 100dvh;
   background: #0a0b0d;
   color: var(--texto-hud);
   font-family: "Courier New", Courier, monospace;
@@ -20,7 +25,8 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
+  overflow-x: hidden;
 }
 
 #contenedor-juego {
@@ -28,25 +34,86 @@ html, body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 16px 0;
+  padding: 12px;
+  /* En pantallas angostas de verdad, mejor dejar hacer scroll horizontal
+     dentro de este contenedor que aplastar el lienzo hasta hacerlo
+     ilegible (ver min-width del lienzo más abajo). */
+  overflow-x: auto;
 }
 
 #lienzo {
   background: #3a3d42;
-  width: min(96vw, 960px);
-  height: auto;
-  aspect-ratio: 960 / 600;
   image-rendering: pixelated;
   border: 3px solid #f2b705;
   border-radius: 6px;
   box-shadow: 0 0 24px rgba(242, 183, 5, 0.25);
   cursor: pointer;
+  /* Evita que el navegador intente hacer scroll/zoom con gestos táctiles
+     sobre el lienzo mientras se juega desde una tablet o celular. */
+  touch-action: none;
+
+  /* --- Escalado responsivo, manteniendo siempre la proporción 960×600 --- */
+  aspect-ratio: 960 / 600;
+  height: auto;
+
+  /* 1) Respaldo simple para navegadores sin soporte de "dvh": el ancho
+        nunca pasa de 960px (resolución nativa, para no verse borroso)
+        ni del 96% del ancho de la ventana. */
+  width: min(960px, 96vw);
+
+  /* 2) Versión mejorada: además de lo anterior, el ancho tampoco puede
+        hacer que el alto (ancho / 1.6) se salga del alto disponible de
+        la ventana, restando el espacio que ocupan los márgenes y la
+        leyenda de controles debajo. Así el lienzo siempre cabe completo
+        sin necesidad de JavaScript. Si el navegador no entiende "dvh",
+        esta línea es inválida y se ignora, quedando la línea anterior. */
+  width: min(960px, 96vw, calc((100dvh - 96px) * 960 / 600));
+
+  /* Nunca lo dejamos encoger tanto que el HUD se vuelva ilegible;
+     por debajo de este ancho, mejor hacer scroll horizontal. */
+  min-width: 480px;
+  max-width: 100%;
 }
 
 #pista-inferior {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 10px;
   font-size: 13px;
   color: #a8aab0;
   text-align: center;
-  margin: 0 8px 12px 8px;
+  margin: 0 12px 12px 12px;
   letter-spacing: 0.5px;
+  max-width: 960px;
+}
+
+#pista-inferior span:not(:last-child)::after {
+  content: "·";
+  margin-left: 10px;
+  color: #4a4d52;
+}
+
+/* Pantallas angostas (celulares en vertical): letra un poco más chica
+   en la leyenda de controles para que no ocupe tanto espacio. */
+@media (max-width: 480px) {
+  #pista-inferior {
+    font-size: 11px;
+  }
+}
+
+/* Pantallas muy bajas (celular en horizontal, ventanas chicas): el
+   juego es lo importante, así que se prioriza el lienzo y se oculta
+   la leyenda de controles para que no obligue a hacer scroll. */
+@media (max-height: 480px) {
+  html, body {
+    justify-content: flex-start;
+  }
+  #contenedor-juego {
+    padding: 6px;
+  }
+  #pista-inferior {
+    display: none;
+  }
 }
